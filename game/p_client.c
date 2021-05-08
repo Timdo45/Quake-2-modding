@@ -607,12 +607,29 @@ but is called after each death and level change in deathmatch
 void InitClientPersistant (gclient_t *client)
 {
 	gitem_t		*item;
+	gitem_t		*item2;
+	gitem_t		*item3;
+	gitem_t		*item4;
+	gitem_t		*item5;
+
+	int index;
 
 	memset (&client->pers, 0, sizeof(client->pers));
 
-	item = FindItem("Blaster");
+	item = FindItem("blaster");
 	client->pers.selected_item = ITEM_INDEX(item);
+	item2 = FindItem("Shotgun");
+	item3 = FindItem("Super Shotgun");
+	item4 = FindItem("Machinegun");
+	item5 = FindItem("Chaingun");
+
 	client->pers.inventory[client->pers.selected_item] = 1;
+	client->pers.inventory[ITEM_INDEX(item2)]=2;
+	client->pers.inventory[ITEM_INDEX(item3)] = 3;
+	client->pers.inventory[ITEM_INDEX(item4)] = 4;
+	client->pers.inventory[ITEM_INDEX(item5)] = 5;
+
+	
 
 	client->pers.weapon = item;
 
@@ -667,11 +684,20 @@ void SaveClientData (void)
 
 void FetchClientEntData (edict_t *ent)
 {
-	ent->health = ent->client->pers.health;
+	gitem_t *ammo;
+	ammo = FindItem("Shells");
+
+	ent->health = 100;
 	ent->max_health = ent->client->pers.max_health;
 	ent->flags |= ent->client->pers.savedFlags;
 	if (coop->value)
 		ent->client->resp.score = ent->client->pers.score;
+	Add_Ammo(ent, ammo, 1000);
+	ammo = FindItem("Grenades");
+	Add_Ammo(ent, ammo, 1000);
+	ammo = FindItem("Bullets");
+	Add_Ammo(ent, ammo, 1000);
+	
 }
 
 
@@ -1266,7 +1292,6 @@ deathmatch mode, so clear everything out before starting them.
 void ClientBeginDeathmatch (edict_t *ent)
 {
 	G_InitEdict (ent);
-
 	InitClientResp (ent->client);
 
 	// locate ent at a spawn point
@@ -1279,7 +1304,6 @@ void ClientBeginDeathmatch (edict_t *ent)
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	gi.bprintf (PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
-
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);
 }

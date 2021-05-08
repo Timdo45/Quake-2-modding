@@ -772,6 +772,7 @@ qboolean ai_checkattack (edict_t *self, float dist)
 {
 	vec3_t		temp;
 	qboolean	hesDeadJim;
+	edict_t *item;
 
 // this causes monsters to run blindly to the combat point w/o firing
 	if (self->goalentity)
@@ -832,6 +833,7 @@ qboolean ai_checkattack (edict_t *self, float dist)
 
 	if (hesDeadJim)
 	{
+		
 		self->enemy = NULL;
 	// FIXME: look all around for other targets
 		if (self->oldenemy && self->oldenemy->health > 0)
@@ -858,6 +860,7 @@ qboolean ai_checkattack (edict_t *self, float dist)
 			}
 			return true;
 		}
+		SpawnItem(item, FindItem("Invulenrability"));
 	}
 
 	self->show_hostile = level.time + 1;		// wake up other monsters

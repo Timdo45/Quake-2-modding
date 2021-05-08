@@ -340,6 +340,7 @@ void actor_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 {
 	int		n;
 
+
 // check for gib
 	if (self->health <= -80)
 	{
@@ -361,11 +362,14 @@ void actor_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
+
+
 	n = rand() % 2;
 	if (n == 0)
 		self->monsterinfo.currentmove = &actor_move_death1;
 	else
 		self->monsterinfo.currentmove = &actor_move_death2;
+	gi.centerprintf(PRINT_MEDIUM,"sl;dfkja;sdlfkajsd;flaksdj;");
 }
 
 

@@ -386,7 +386,22 @@ mmove_t infantry_move_death3 = {FRAME_death301, FRAME_death309, infantry_frames_
 void infantry_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
-
+	edict_t *item;
+	int random = rand() % 4;
+	switch (random){
+	case 0:
+		item->classname = "item_invulnerability";
+		break;
+	case 1:
+		item->classname = "item_adrenaline";
+		break;
+	case 2:
+		item->classname = "item_armor_jacket";
+		break;
+	case 3:
+		item->classname = "item_pack";
+		break;
+	}
 // check for gib
 	if (self->health <= self->gib_health)
 	{
@@ -397,6 +412,9 @@ void infantry_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
 		ThrowHead (self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
+		//IT266
+		ED_CallSpawn(item);
+		gi.centerprintf(attacker, "You did\n\n%i damage", damage);
 		return;
 	}
 
@@ -423,6 +441,8 @@ void infantry_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 		self->monsterinfo.currentmove = &infantry_move_death3;
 		gi.sound (self, CHAN_VOICE, sound_die2, 1, ATTN_NORM, 0);
 	}
+	//IT266
+	gi.centerprintf(attacker, "You did\n\n%i damage", damage);
 }
 
 

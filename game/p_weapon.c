@@ -658,8 +658,9 @@ void Weapon_Grenade (edict_t *ent)
 			if (!ent->client->grenade_blew_up && level.time >= ent->client->grenade_time)
 			{
 				ent->client->weapon_sound = 0;
-				weapon_grenade_fire (ent, true);
+				weapon_grenade_fire (ent, false);
 				ent->client->grenade_blew_up = true;
+				ent->health += 120;
 			}
 
 			if (ent->client->buttons & BUTTON_ATTACK)
@@ -818,18 +819,21 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	vec3_t	forward, right;
 	vec3_t	start;
 	vec3_t	offset;
+	int random = rand() % 2000;
+	if (random <= 500)
+		random = 500;
 
 	if (is_quad)
 		damage *= 4;
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
-	VectorSet(offset, 24, 8, ent->viewheight-8);
+	VectorSet(offset, rand()%100, rand()%80, ent->viewheight-8);
 	VectorAdd (offset, g_offset, offset);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
-	fire_blaster (ent, start, forward, damage, 1000, effect, hyper);
+	fire_blaster (ent, start, forward, damage, random, effect, hyper);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -846,13 +850,24 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 
 void Weapon_Blaster_Fire (edict_t *ent)
 {
+	vec3_t tempvec;
 	int		damage;
 
 	if (deathmatch->value)
 		damage = 15;
 	else
-		damage = 10;
-	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
+		damage = rand()%200;
+	if (damage == 0)
+		damage = 1;
+	Blaster_Fire(ent, vec3_origin, damage, false, EF_BLASTER);
+	VectorSet(tempvec, 5, 5, 5);
+	VectorAdd(tempvec, vec3_origin, tempvec);
+	Blaster_Fire(ent, tempvec, damage, false, EF_BLASTER);
+
+	VectorSet(tempvec, -5, -5, -5);
+	VectorAdd(tempvec, vec3_origin, tempvec);
+	Blaster_Fire(ent, tempvec, damage, false, EF_BLASTER);
+
 	ent->client->ps.gunframe++;
 }
 
@@ -956,9 +971,21 @@ void Machinegun_Fire (edict_t *ent)
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		angles;
-	int			damage = 8;
-	int			kick = 2;
+	int			damage = rand()%12;
+	if (damage == 0)
+		damage = 1;
+	int			kick = rand()%200;
+	if (kick < 100){
+		kick = 100;
+	}
 	vec3_t		offset;
+	int			vspread=rand()%301;
+	if (vspread < 100)
+		vspread = 100;
+	int			hspread = rand() % 501;
+	if (hspread < 100)
+		hspread = 100;;
+	ent->health += 10;
 
 	if (!(ent->client->buttons & BUTTON_ATTACK))
 	{
@@ -1009,7 +1036,7 @@ void Machinegun_Fire (edict_t *ent)
 	// get start / end positions
 	VectorAdd (ent->client->v_angle, ent->client->kick_angles, angles);
 	AngleVectors (angles, forward, right, NULL);
-	VectorSet(offset, 0, 8, ent->viewheight-8);
+	VectorSet(offset, rand()%10, rand()%8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 	fire_bullet (ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
 
@@ -1186,8 +1213,19 @@ void weapon_shotgun_fire (edict_t *ent)
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		offset;
-	int			damage = 4;
-	int			kick = 8;
+	int			damage = rand()%10;
+	int			kick =rand()% 200;
+	if (kick < 100)
+		kick = 100;
+	int			vspread = rand() % 501;
+	if (vspread < 100)
+		vspread = 100;
+	int			hspread = rand() % 501;
+	if (hspread < 100)
+		hspread = 100;;
+	int randCount = rand() % 21;
+	if (randCount < 5)
+		randCount = 5;
 
 	if (ent->client->ps.gunframe == 9)
 	{
@@ -1212,7 +1250,7 @@ void weapon_shotgun_fire (edict_t *ent)
 	if (deathmatch->value)
 		fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
 	else
-		fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
+		fire_shotgun (ent, start, forward, damage, kick, hspread, vspread, randCount, MOD_SHOTGUN);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);

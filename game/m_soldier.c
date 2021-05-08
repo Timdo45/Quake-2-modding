@@ -448,6 +448,7 @@ void soldier_pain (edict_t *self, edict_t *other, float kick, int damage)
 		self->monsterinfo.currentmove = &soldier_move_pain2;
 	else
 		self->monsterinfo.currentmove = &soldier_move_pain3;
+	gi.centerprintf(other, "You did\n\n%i damage", damage);
 }
 
 
@@ -883,12 +884,29 @@ void soldier_fire7 (edict_t *self)
 
 void soldier_dead (edict_t *self)
 {
+	edict_t *item;
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, -8);
 	self->movetype = MOVETYPE_TOSS;
 	self->svflags |= SVF_DEADMONSTER;
 	self->nextthink = 0;
 	gi.linkentity (self);
+	int random = rand() % 4;
+	switch (random){
+	case 0:
+		item->classname = "item_invulnerability";
+		break;
+	case 1:
+		item->classname = "item_adrenaline";
+		break;
+	case 2:
+		item->classname = "item_armor_jacket";
+		break;
+	case 3:
+		item->classname = "item_pack";
+		break;
+	}
+	ED_CallSpawn(item);
 }
 
 mframe_t soldier_frames_death1 [] =
@@ -1144,6 +1162,22 @@ mmove_t soldier_move_death6 = {FRAME_death601, FRAME_death610, soldier_frames_de
 void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
+	edict_t *item;
+	int random = rand() % 4;
+	switch (random){
+	case 0:
+		item->classname = "item_invulnerability";
+		break;
+	case 1:
+		item->classname = "item_adrenaline";
+		break;
+	case 2:
+		item->classname = "item_armor_jacket";
+		break;
+	case 3:
+		item->classname = "item_pack";
+		break;
+	}
 
 // check for gib
 	if (self->health <= self->gib_health)
@@ -1154,6 +1188,9 @@ void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 		ThrowGib (self, "models/objects/gibs/chest/tris.md2", damage, GIB_ORGANIC);
 		ThrowHead (self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
+		//IT266
+		ED_CallSpawn(item);
+		gi.centerprintf(attacker, "You did\n\n%i damage", damage);
 		return;
 	}
 
@@ -1164,7 +1201,7 @@ void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->s.skinnum |= 1;
-
+	
 	if (self->s.skinnum == 1)
 		gi.sound (self, CHAN_VOICE, sound_death_light, 1, ATTN_NORM, 0);
 	else if (self->s.skinnum == 3)
@@ -1190,6 +1227,9 @@ void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 		self->monsterinfo.currentmove = &soldier_move_death5;
 	else
 		self->monsterinfo.currentmove = &soldier_move_death6;
+	//IT266
+	gi.centerprintf(attacker, "You did\n\n%i damage", damage);
+
 }
 
 
@@ -1252,7 +1292,9 @@ void SP_monster_soldier_light (edict_t *self)
 	gi.soundindex ("soldier/solatck2.wav");
 
 	self->s.skinnum = 0;
-	self->health = 20;
+	self->health = rand()%200;
+	if (self->health <= 20)
+		self->health = 20;
 	self->gib_health = -30;
 }
 
@@ -1273,7 +1315,9 @@ void SP_monster_soldier (edict_t *self)
 	gi.soundindex ("soldier/solatck1.wav");
 
 	self->s.skinnum = 2;
-	self->health = 30;
+	self->health = rand() % 200;
+	if (self->health <= 20)
+		self->health = 20;
 	self->gib_health = -30;
 }
 
@@ -1294,6 +1338,8 @@ void SP_monster_soldier_ss (edict_t *self)
 	gi.soundindex ("soldier/solatck3.wav");
 
 	self->s.skinnum = 4;
-	self->health = 40;
+	self->health = rand() % 200;
+	if (self->health <= 20)
+		self->health = 20;
 	self->gib_health = -30;
 }
